@@ -1,5 +1,5 @@
 ---
-name: "ioncore-win-signer"
+name: "ion-win-signer"
 distro: "ubuntu"
 suites:
 - "bionic"
@@ -16,7 +16,7 @@ remotes:
   "dir": "signature"
 files:
 - "osslsigncode-2.0.tar.xz"
-- "ioncore-win-unsigned.tar.gz"
+- "ion-win-unsigned.tar.gz"
 script: |
   set -e -o pipefail
 
@@ -27,7 +27,7 @@ script: |
   echo "015cb6c6fe5f5bd102059788cc9ba6015b0d6b21a91e3b929d8c63fbba75b779  osslsigncode-2.0.tar.xz" | sha256sum -c
 
   mkdir -p ${UNSIGNED_DIR}
-  tar -C ${UNSIGNED_DIR} -xf ioncore-win-unsigned.tar.xz
+  tar -C ${UNSIGNED_DIR} -xf ion-win-unsigned.tar.xz
 
   tar xJf osslsigncode-2.0.tar.xz
   cd osslsigncode-2.0
