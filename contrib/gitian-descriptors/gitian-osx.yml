@@ -1,5 +1,5 @@
 ---
-name: "ion-osx-4.0"
+name: "ion-osx-3.0.5"
 enable_cache: true
 distro: "ubuntu"
 suites:
