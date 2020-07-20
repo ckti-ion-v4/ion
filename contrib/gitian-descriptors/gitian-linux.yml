@@ -1,6 +1,7 @@
 ---
-name: "ion-linux-3.1"
+name: "ion-linux-3.0.5"
 enable_cache: true
+distro: "ubuntu"
 suites:
 - "bionic"
 architectures:
@@ -19,6 +20,14 @@ packages:
 - "g++-8-riscv64-linux-gnu"
 - "gcc-8-riscv64-linux-gnu"
 - "binutils-riscv64-linux-gnu"
+- "g++-powerpc64le-linux-gnu"
+- "g++-8-powerpc64le-linux-gnu"
+- "gcc-8-powerpc64le-linux-gnu"
+- "binutils-powerpc64le-linux-gnu"
+- "g++-i686-linux-gnu"
+- "g++-8-i686-linux-gnu"
+- "gcc-8-i686-linux-gnu"
+- "binutils-i686-linux-gnu"
 - "g++-8-multilib"
 - "gcc-8-multilib"
 - "binutils-gold"
@@ -30,15 +39,20 @@ packages:
 - "faketime"
 - "bsdmainutils"
 - "ca-certificates"
-- "python"
+- "python3"
+- "cmake"
+- "libxkbcommon0"
+- "linux-libc-dev"
+- "doxygen"
 remotes:
-- "url": "https://github.com/ioncoincore/ion.git"
+- "url": "https://bitbucket.org/ioncoin/ion.git"
   "dir": "ion"
 files: []
 script: |
+  set -e -o pipefail
 
   WRAP_DIR=$HOME/wrapped
-  HOSTS="i686-pc-linux-gnu x86_64-linux-gnu arm-linux-gnueabihf aarch64-linux-gnu riscv64-linux-gnu"
+  HOSTS="i686-pc-linux-gnu x86_64-linux-gnu arm-linux-gnueabihf aarch64-linux-gnu" # riscv64-linux-gnu s390x-linux-gnu powerpc64-linux-gnu mipsel-linux-gnu mips-linux-gnu powerpc64le-linux-gnu
   CONFIGFLAGS="--enable-glibc-back-compat --enable-reduce-exports --disable-bench --disable-gui-tests"
   FAKETIME_HOST_PROGS="gcc g++"
   FAKETIME_PROGS="date ar ranlib nm"
@@ -172,15 +186,14 @@ script: |
 
     CONFIG_SITE=${BASEPREFIX}/${i}/share/config.site ./configure --prefix=/ --disable-ccache --disable-maintainer-mode --disable-dependency-tracking ${CONFIGFLAGS} CFLAGS="${HOST_CFLAGS}" CXXFLAGS="${HOST_CXXFLAGS}" LDFLAGS="${HOST_LDFLAGS}"
     make ${MAKEOPTS}
-    make ${MAKEOPTS} -C src check-security
-    make ${MAKEOPTS} -C src check-symbols
     make install DESTDIR=${INSTALLPATH}
     cd installed
     find . -name "lib*.la" -delete
     find . -name "lib*.a" -delete
     rm -rf ${DISTNAME}/lib/pkgconfig
-    find ${DISTNAME}/bin -type f -executable -exec ../contrib/devtools/split-debug.sh {} {} {}.dbg \;
-    # find ${DISTNAME}/lib -type f -exec ../contrib/devtools/split-debug.sh {} {} {}.dbg \;
+    find ${DISTNAME}/bin -type f -executable -print0 | xargs -0 -n1 -I{} ../contrib/devtools/split-debug.sh {} {} {}.dbg
+    #find ${DISTNAME}/lib -type f -print0 | xargs -0 -n1 -I{} ../contrib/devtools/split-debug.sh {} {} {}.dbg
+    cp ../doc/README.md ${DISTNAME}/
     find ${DISTNAME} -not -name "*.dbg" | sort | tar --no-recursion --mode='u+rw,go+r-w,a+X' --owner=0 --group=0 -c -T - | gzip -9n > ${OUTDIR}/${DISTNAME}-${i}.tar.gz
     find ${DISTNAME} -name "*.dbg" | sort | tar --no-recursion --mode='u+rw,go+r-w,a+X' --owner=0 --group=0 -c -T - | gzip -9n > ${OUTDIR}/${DISTNAME}-${i}-debug.tar.gz
     cd ../../
